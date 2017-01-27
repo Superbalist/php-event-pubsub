@@ -1,0 +1,7 @@
+version: '2'
+services:
+  php-event-pubsub:
+    build: .
+    volumes:
+      - ./src:/opt/php-event-pubsub/src
+      - ./examples:/opt/php-event-pubsub/examples

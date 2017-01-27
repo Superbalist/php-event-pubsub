@@ -262,3 +262,19 @@ Your validator must implement the following methods.
  */
 public function validates(EventInterface $event);
 ```
+
+## Examples
+
+The library comes with [examples](examples) for the different types of events and a [Dockerfile](Dockerfile) for
+running the example scripts.
+
+Run `make up`.
+
+You will start at a `bash` prompt in the `/opt/php-event-pubsub` directory.
+
+To run the examples:
+```bash
+$ php examples/SimpleEventExample.php
+$ php examples/TopicEventExample.php
+$ php examples/SchemaEventExample.php
+```
