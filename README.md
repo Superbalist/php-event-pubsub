@@ -18,6 +18,12 @@ listening to and dispatching events over pub/sub channels.
 composer require superbalist/php-event-pubsub
 ```
 
+## Integrations
+
+Want to get started quickly? Check out some of these integrations:
+
+* Laravel - https://github.com/Superbalist/laravel-event-pubsub
+
 ## Usage
 
 ### Simple Events
