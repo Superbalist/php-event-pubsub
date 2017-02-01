@@ -27,6 +27,14 @@ interface EventInterface
     public function getAttribute($name);
 
     /**
+     * Set an event attribute.
+     *
+     * @param string|array $name
+     * @param mixed $value
+     */
+    public function setAttribute($name, $value = null);
+
+    /**
      * Check whether or not an event has an attribute.
      *
      * @param string $name

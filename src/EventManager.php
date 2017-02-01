@@ -22,18 +22,26 @@ class EventManager
     protected $validator;
 
     /**
+     * @var array
+     */
+    protected $attributeInjectors;
+
+    /**
      * @param PubSubAdapterInterface $adapter
      * @param MessageTranslatorInterface $translator
      * @param EventValidatorInterface|null $validator
+     * @param array $attributeInjectors
      */
     public function __construct(
         PubSubAdapterInterface $adapter,
         MessageTranslatorInterface $translator,
-        EventValidatorInterface $validator = null
+        EventValidatorInterface $validator = null,
+        array $attributeInjectors = []
     ) {
         $this->adapter = $adapter;
         $this->translator = $translator;
         $this->validator = $validator;
+        $this->attributeInjectors = $attributeInjectors;
     }
 
     /**
@@ -67,6 +75,26 @@ class EventManager
     }
 
     /**
+     * Return all attribute injectors.
+     *
+     * @return array
+     */
+    public function getAttributeInjectors()
+    {
+        return $this->attributeInjectors;
+    }
+
+    /**
+     * Add an attribute injector.
+     *
+     * @param AttributeInjectorInterface|callable $attributeInjector
+     */
+    public function addAttributeInjector($attributeInjector)
+    {
+        $this->attributeInjectors[] = $attributeInjector;
+    }
+
+    /**
      * Listen for an event.
      *
      * @param string $channel
@@ -92,6 +120,25 @@ class EventManager
     }
 
     /**
+     * @return array
+     */
+    protected function getValuesFromAttributeInjectors()
+    {
+        $values = [];
+
+        foreach ($this->attributeInjectors as $injector) {
+            if ($injector instanceof AttributeInjectorInterface) {
+                $values[$injector->getAttributeKey()] = $injector->getAttributeValue();
+            } elseif (is_callable($injector)) {
+                $v = call_user_func($injector);
+                $values[$v['key']] = $v['value'];
+            }
+        }
+
+        return $values;
+    }
+
+    /**
      * Dispatch an event.
      *
      * @param string $channel
@@ -99,6 +146,11 @@ class EventManager
      */
     public function dispatch($channel, EventInterface $event)
     {
-        $this->adapter->publish($channel, $event->toMessage());
+        // automagically inject attributes from injectors
+        $attributes = $this->getValuesFromAttributeInjectors();
+        $e = clone $event; // we don't want to manipulate the original event
+        $e->setAttribute($attributes);
+
+        $this->adapter->publish($channel, $e->toMessage());
     }
 }

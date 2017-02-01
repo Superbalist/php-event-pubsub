@@ -198,6 +198,14 @@ public function getAttributes();
 public function getAttribute($name);
 
 /**
+ * Set an event attribute.
+ *
+ * @param string|array $name
+ * @param mixed $value
+ */
+public function setAttribute($name, $value = null);
+
+/**
  * Check whether or not an event has an attribute.
  *
  * @param string $name
@@ -267,6 +275,97 @@ Your validator must implement the following methods.
  * @return bool
  */
 public function validates(EventInterface $event);
+```
+
+## Attribute Injectors
+
+An attribute injector allows you to have attributes automatically injected into events when events are dispatched.
+
+The library comes bundled with a few injectors out of the box.
+* DateAttributeInjector - injects a `date` key with an ISO 8601 date time
+* GenericAttributeInjector - injects a custom `key` and `value`
+* HostnameAttributeInjector - injects a `hostname` key with the server hostname
+* Uuid4AttributeInjector - injects a `uuid` key with a UUID-4
+
+You can write your own injector by implementing the `AttributeInjectorInterface` or by passing a callable (which returns
+an array with a 'key' and 'value') to the event manager.
+
+Your injector must implement the following methods.
+
+```php
+/**
+ * @return string
+ */
+public function getAttributeKey();
+
+/**
+ * @return mixed
+ */
+public function getAttributeValue();
+```
+
+Here's a usage example demonstrating both a class and a callable.
+
+### Custom Class
+
+```php
+use Superbalist\EventPubSub\AttributeInjectorInterface;
+
+class UserAttributeInjector implements AttributeInjectorInterface
+{
+    /**
+     * @return string
+     */
+    public function getAttributeKey()
+    {
+        return "user";
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAttributeValue()
+    {
+        return [
+            'id' => 2416334,
+            'email' => 'john.doe@example.org',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+        ];
+    }
+}
+
+// create a new event manager
+$adapter = new \Superbalist\PubSub\Adapters\LocalPubSubAdapter();
+$translator = new \Superbalist\EventPubSub\Translators\SimpleEventMessageTranslator();
+$manager = new \Superbalist\EventPubSub\EventManager($adapter, $translator);
+
+$manager->addAttributeInjector(new UserAttributeInjector());
+
+// or
+$manager = new \Superbalist\EventPubSub\EventManager($adapter, $translator, null, [new UserAttributeInjector()]);
+
+```
+
+### Callable
+
+```php
+// create a new event manager
+$adapter = new \Superbalist\PubSub\Adapters\LocalPubSubAdapter();
+$translator = new \Superbalist\EventPubSub\Translators\SimpleEventMessageTranslator();
+$manager = new \Superbalist\EventPubSub\EventManager($adapter, $translator);
+
+$manager->addAttributeInjector(function () {
+    return [
+        'key' => 'user',
+        'value' => [
+            'id' => 2416334,
+            'email' => 'john.doe@example.org',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+        ],
+    ];
+});
 ```
 
 ## Examples

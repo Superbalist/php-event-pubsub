@@ -58,6 +58,23 @@ class SimpleEvent implements EventInterface
     }
 
     /**
+     * Set an event attribute.
+     *
+     * @param string|array $name
+     * @param mixed $value
+     */
+    public function setAttribute($name, $value = null)
+    {
+        if (is_array($name)) {
+            foreach ($name as $k => $v) {
+                $this->attributes[$k] = $v;
+            }
+        } else {
+            $this->attributes[$name] = $value;
+        }
+    }
+
+    /**
      * Check whether or not an event has an attribute.
      *
      * @param string $name
