@@ -149,7 +149,11 @@ class EventManager
         // automagically inject attributes from injectors
         $attributes = $this->getValuesFromAttributeInjectors();
         $e = clone $event; // we don't want to manipulate the original event
-        $e->setAttribute($attributes);
+        foreach ($attributes as $k => $v) {
+            if (!$e->hasAttribute($k)) {
+                $e->setAttribute($k, $v);
+            }
+        }
 
         $this->adapter->publish($channel, $e->toMessage());
     }
