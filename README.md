@@ -344,7 +344,6 @@ $manager->addAttributeInjector(new UserAttributeInjector());
 
 // or
 $manager = new \Superbalist\EventPubSub\EventManager($adapter, $translator, null, [new UserAttributeInjector()]);
-
 ```
 
 ### Callable
