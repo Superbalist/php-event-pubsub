@@ -125,7 +125,7 @@ class EventManagerTest extends TestCase
         $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
         $manager->dispatch('channel', $event);
 
-        // original event should now have injections as attributes
+        // original event should not have injections as attributes
         $this->assertSame(['user' => ['id' => 1234]], $event->getAttributes());
     }
 
