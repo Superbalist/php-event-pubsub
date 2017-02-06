@@ -6,6 +6,7 @@ interface EventValidatorInterface
 {
     /**
      * @param EventInterface $event
+     *
      * @return bool
      */
     public function validates(EventInterface $event);

@@ -25,6 +25,7 @@ class JSONSchemaEventValidator implements EventValidatorInterface
 
     /**
      * @param EventInterface $event
+     *
      * @return bool
      */
     public function validates(EventInterface $event)
@@ -39,6 +40,7 @@ class JSONSchemaEventValidator implements EventValidatorInterface
     /**
      * @param EventInterface $event
      * @param object $schema
+     *
      * @return bool
      */
     public function isValidAgainstSchema(EventInterface $event, $schema)
@@ -56,6 +58,7 @@ class JSONSchemaEventValidator implements EventValidatorInterface
 
     /**
      * @param EventInterface $event
+     *
      * @return null|object
      */
     public function getEventSchema(EventInterface $event)

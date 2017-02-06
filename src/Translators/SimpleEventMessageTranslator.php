@@ -7,9 +7,9 @@ use Superbalist\EventPubSub\MessageTranslatorInterface;
 
 class SimpleEventMessageTranslator implements MessageTranslatorInterface
 {
-
     /**
      * @param mixed $message
+     *
      * @return null|SimpleEvent
      */
     public function translate($message)

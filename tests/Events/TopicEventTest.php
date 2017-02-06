@@ -36,7 +36,7 @@ class TopicEventTest extends TestCase
             ],
             'request' => [
                 'ip' => '127.0.0.1',
-                'useragent'=> 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
+                'useragent' => 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
                 'url' => 'http://my.website.example.com',
             ],
         ];
@@ -81,7 +81,7 @@ class TopicEventTest extends TestCase
             ],
             'request' => [
                 'ip' => '127.0.0.1',
-                'useragent'=> 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
+                'useragent' => 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
                 'url' => 'http://my.website.example.com',
             ],
         ];
@@ -181,7 +181,7 @@ class TopicEventTest extends TestCase
                 ],
                 'request' => [
                     'ip' => '127.0.0.1',
-                    'useragent'=> 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
+                    'useragent' => 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
                     'url' => 'http://my.website.example.com',
                 ],
             ]

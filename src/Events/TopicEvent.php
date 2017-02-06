@@ -69,6 +69,7 @@ class TopicEvent extends SimpleEvent implements EventInterface
      * Check whether or not the event matches the given expression.
      *
      * @param string $expr
+     *
      * @return bool
      */
     public function matches($expr)
@@ -96,6 +97,7 @@ class TopicEvent extends SimpleEvent implements EventInterface
 
     /**
      * @param string $expr
+     *
      * @return array
      */
     public static function parseEventExpr($expr)

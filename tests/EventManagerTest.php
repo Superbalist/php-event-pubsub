@@ -81,7 +81,7 @@ class EventManagerTest extends TestCase
                     'user' => [
                         'id' => 1234,
                     ],
-                ]
+                ],
             ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
@@ -105,7 +105,7 @@ class EventManagerTest extends TestCase
                     ],
                     'service' => 'user-api',
                     'cluster' => 'api',
-                ]
+                ],
             ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
@@ -117,7 +117,7 @@ class EventManagerTest extends TestCase
                     'key' => 'cluster',
                     'value' => 'api',
                 ];
-            }
+            },
         ];
 
         $manager = new EventManager($adapter, $translator, null, $injectors);
@@ -141,7 +141,7 @@ class EventManagerTest extends TestCase
                         'id' => 1234,
                     ],
                     'date' => 'my_date',
-                ]
+                ],
             ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
