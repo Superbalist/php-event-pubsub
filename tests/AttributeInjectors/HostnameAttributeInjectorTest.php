@@ -9,7 +9,7 @@ class HostnameAttributeInjectorTest extends TestCase
 {
     public function testGetAttributeKey()
     {
-        $injector = new HostnameAttributeInjectorTest();
+        $injector = new HostnameAttributeInjector();
         $this->assertEquals('hostname', $injector->getAttributeKey());
 
         $injector = new HostnameAttributeInjectorTest('custom_attribute');
