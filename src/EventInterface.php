@@ -22,6 +22,7 @@ interface EventInterface
      * Return an event attribute.
      *
      * @param string $name
+     *
      * @return mixed
      */
     public function getAttribute($name);
@@ -38,6 +39,7 @@ interface EventInterface
      * Check whether or not an event has an attribute.
      *
      * @param string $name
+     *
      * @return bool
      */
     public function hasAttribute($name);
@@ -46,6 +48,7 @@ interface EventInterface
      * Check whether or not the event matches the given expression.
      *
      * @param string $expr
+     *
      * @return bool
      */
     public function matches($expr);

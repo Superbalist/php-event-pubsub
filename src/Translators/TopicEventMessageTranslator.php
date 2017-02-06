@@ -9,6 +9,7 @@ class TopicEventMessageTranslator implements MessageTranslatorInterface
 {
     /**
      * @param mixed $message
+     *
      * @return null|TopicEvent
      */
     public function translate($message)

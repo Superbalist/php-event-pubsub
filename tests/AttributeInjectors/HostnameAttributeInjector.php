@@ -5,7 +5,7 @@ namespace Tests\AttributeInjectors;
 use PHPUnit\Framework\TestCase;
 use Superbalist\EventPubSub\AttributeInjectors\HostnameAttributeInjector;
 
-class HostnameAttributeInjectorTest extends TestCase
+class HostnameAttributeInjector extends TestCase
 {
     public function testGetAttributeKey()
     {

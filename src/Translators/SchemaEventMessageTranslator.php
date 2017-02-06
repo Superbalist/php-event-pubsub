@@ -9,6 +9,7 @@ class SchemaEventMessageTranslator implements MessageTranslatorInterface
 {
     /**
      * @param mixed $message
+     *
      * @return null|SchemaEvent
      */
     public function translate($message)
@@ -32,6 +33,7 @@ class SchemaEventMessageTranslator implements MessageTranslatorInterface
 
     /**
      * @param string $str
+     *
      * @return array|null
      */
     public static function parseSchemaStr($str)
