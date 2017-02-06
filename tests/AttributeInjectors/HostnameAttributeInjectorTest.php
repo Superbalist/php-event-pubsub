@@ -12,13 +12,13 @@ class HostnameAttributeInjectorTest extends TestCase
         $injector = new HostnameAttributeInjector();
         $this->assertEquals('hostname', $injector->getAttributeKey());
 
-        $injector = new HostnameAttributeInjectorTest('custom_attribute');
+        $injector = new HostnameAttributeInjector('custom_attribute');
         $this->assertEquals('custom_attribute', $injector->getAttributeKey());
     }
 
     public function testGetAttributeValue()
     {
-        $injector = new HostnameAttributeInjectorTest();
+        $injector = new HostnameAttributeInjector();
         $this->assertEquals(gethostname(), $injector->getAttributeValue());
     }
 }
