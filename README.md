@@ -70,7 +70,7 @@ $events = [
         ]
     ),
 ];
-$manager->dispatch('events', $events);
+$manager->dispatchBatch('events', $events);
 
 // listen for an event
 $manager->listen('events', 'user.created', function (\Superbalist\EventPubSub\EventInterface $event) {
