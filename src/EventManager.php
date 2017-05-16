@@ -176,6 +176,7 @@ class EventManager
     public function dispatchBatch($channel, array $events)
     {
         $messages = array_map(function (EventInterface $event) {
+            $event = $this->prepEventForDispatch($event);
             return $event->toMessage();
         }, $events);
         $this->adapter->publishBatch($channel, $messages);

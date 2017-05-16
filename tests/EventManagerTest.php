@@ -188,4 +188,51 @@ class EventManagerTest extends TestCase
         ];
         $manager->dispatchBatch('channel', $events);
     }
+
+    public function testDispatchBatchWithInjections()
+    {
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publishBatch')
+            ->withArgs([
+                'channel',
+                [
+                    [
+                        'event' => 'user.created',
+                        'user' => [
+                            'id' => 1234,
+                        ],
+                        'service' => 'user-api',
+                        'cluster' => 'api',
+                    ],
+                    [
+                        'event' => 'user.created',
+                        'user' => [
+                            'id' => 7812,
+                        ],
+                        'service' => 'user-api',
+                        'cluster' => 'api',
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $injectors = [
+            new GenericAttributeInjector('service', 'user-api'),
+            function () {
+                return [
+                    'key' => 'cluster',
+                    'value' => 'api',
+                ];
+            },
+        ];
+
+        $manager = new EventManager($adapter, $translator, null, $injectors);
+
+        $events = [
+            new SimpleEvent('user.created', ['user' => ['id' => 1234]]),
+            new SimpleEvent('user.created', ['user' => ['id' => 7812]]),
+        ];
+        $manager->dispatchBatch('channel', $events);
+    }
 }
