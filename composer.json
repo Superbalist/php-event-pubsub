@@ -10,7 +10,7 @@
   ],
   "require": {
     "php": ">=5.6.0",
-    "superbalist/php-pubsub": "^1.0",
+    "superbalist/php-pubsub": "^2.0",
     "composer/semver": "^1.4",
     "league/json-guard": "^0.5.1",
     "ramsey/uuid": "^3.5"

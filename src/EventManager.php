@@ -139,12 +139,10 @@ class EventManager
     }
 
     /**
-     * Dispatch an event.
-     *
-     * @param string $channel
      * @param EventInterface $event
+     * @return EventInterface
      */
-    public function dispatch($channel, EventInterface $event)
+    protected function prepEventForDispatch(EventInterface $event)
     {
         // automagically inject attributes from injectors
         $attributes = $this->getValuesFromAttributeInjectors();
@@ -154,7 +152,32 @@ class EventManager
                 $e->setAttribute($k, $v);
             }
         }
+        return $e;
+    }
 
+    /**
+     * Dispatch an event.
+     *
+     * @param string $channel
+     * @param EventInterface $event
+     */
+    public function dispatch($channel, EventInterface $event)
+    {
+        $e = $this->prepEventForDispatch($event);
         $this->adapter->publish($channel, $e->toMessage());
+    }
+
+    /**
+     * Dispatch multiple events.
+     *
+     * @param string $channel
+     * @param array $events
+     */
+    public function dispatchBatch($channel, array $events)
+    {
+        $messages = array_map(function (EventInterface $event) {
+            return $event->toMessage();
+        }, $events);
+        $this->adapter->publishBatch($channel, $messages);
     }
 }

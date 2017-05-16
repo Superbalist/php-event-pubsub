@@ -155,4 +155,37 @@ class EventManagerTest extends TestCase
         $event = new SimpleEvent('user.created', ['user' => ['id' => 1234], 'date' => 'my_date']);
         $manager->dispatch('channel', $event);
     }
+
+    public function testDispatchBatch()
+    {
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publishBatch')
+            ->withArgs([
+                'channel',
+                [
+                    [
+                        'event' => 'user.created',
+                        'user' => [
+                            'id' => 1234,
+                        ],
+                    ],
+                    [
+                        'event' => 'user.created',
+                        'user' => [
+                            'id' => 7812,
+                        ],
+                    ],
+                ]
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $manager = new EventManager($adapter, $translator);
+
+        $events = [
+            new SimpleEvent('user.created', ['user' => ['id' => 1234]]),
+            new SimpleEvent('user.created', ['user' => ['id' => 7812]]),
+        ];
+        $manager->dispatchBatch('channel', $events);
+    }
 }

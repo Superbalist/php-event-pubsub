@@ -37,7 +37,7 @@ $adapter = new \Superbalist\PubSub\Adapters\LocalPubSubAdapter();
 $translator = new \Superbalist\EventPubSub\Translators\SimpleEventMessageTranslator();
 $manager = new \Superbalist\EventPubSub\EventManager($adapter, $translator);
 
-// publish an event
+// dispatch an event
 $event = new \Superbalist\EventPubSub\Events\SimpleEvent(
     'user.created',
     [
@@ -50,6 +50,27 @@ $event = new \Superbalist\EventPubSub\Events\SimpleEvent(
     ]
 );
 $manager->dispatch('events', $event);
+
+// dispatch multiple events
+$events = [
+    new \Superbalist\EventPubSub\Events\SimpleEvent(
+        'user.created',
+        [
+            'user' => [
+                // ...
+            ],
+        ]
+    ),
+    new \Superbalist\EventPubSub\Events\SimpleEvent(
+        'user.created',
+        [
+            'user' => [
+                // ...
+            ],
+        ]
+    ),
+];
+$manager->dispatch('events', $events);
 
 // listen for an event
 $manager->listen('events', 'user.created', function (\Superbalist\EventPubSub\EventInterface $event) {
@@ -73,7 +94,7 @@ $adapter = new \Superbalist\PubSub\Adapters\LocalPubSubAdapter();
 $translator = new \Superbalist\EventPubSub\Translators\TopicEventMessageTranslator();
 $manager = new \Superbalist\EventPubSub\EventManager($adapter, $translator);
 
-// publish an event
+// dispatch an event
 $event = new \Superbalist\EventPubSub\Events\TopicEvent(
     'user',
     'created',
@@ -151,7 +172,7 @@ $validator = new \Superbalist\EventPubSub\Validators\JSONSchemaEventValidator($d
 
 $manager = new \Superbalist\EventPubSub\EventManager($adapter, $translator, $validator);
 
-// publish an event
+// dispatch an event
 $event = new \Superbalist\EventPubSub\Events\SchemaEvent(
     'http://schemas.my-website.org/events/user/created/1.0.json',
     [

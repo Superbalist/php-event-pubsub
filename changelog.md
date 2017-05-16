@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.0 - 2017-05-16
+
+* Bump up to superbalist/php-pubsub ^2.0
+* Add new dispatchBatch method to EventManager for dispatching multiple events at once
+
 ## 2.0.0 - 2017-02-01
 
 * Add `setAttribute` method to `EventInterface`
