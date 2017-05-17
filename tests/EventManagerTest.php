@@ -175,7 +175,7 @@ class EventManagerTest extends TestCase
                             'id' => 7812,
                         ],
                     ],
-                ]
+                ],
             ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);

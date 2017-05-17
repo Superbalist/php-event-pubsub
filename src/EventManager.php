@@ -140,6 +140,7 @@ class EventManager
 
     /**
      * @param EventInterface $event
+     *
      * @return EventInterface
      */
     protected function prepEventForDispatch(EventInterface $event)
