@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1 - ?
+
+* Add support for translate, listen expr & validation failure callbacks
+
 ## 3.0.0 - 2017-05-16
 
 * Bump up to superbalist/php-pubsub ^2.0

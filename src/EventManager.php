@@ -27,21 +27,45 @@ class EventManager
     protected $attributeInjectors;
 
     /**
+     * @var callable|null
+     */
+    protected $translateFailHandler;
+
+    /**
+     * @var callable|null
+     */
+    protected $listenExprFailHandler;
+
+    /**
+     * @var callable|null
+     */
+    protected $validationFailHandler;
+
+    /**
      * @param PubSubAdapterInterface $adapter
      * @param MessageTranslatorInterface $translator
      * @param EventValidatorInterface|null $validator
      * @param array $attributeInjectors
+     * @param callable|null $translateFailHandler
+     * @param callable|null $listenExprFailHandler
+     * @param callable|null $validationFailHandler
      */
     public function __construct(
         PubSubAdapterInterface $adapter,
         MessageTranslatorInterface $translator,
         EventValidatorInterface $validator = null,
-        array $attributeInjectors = []
+        array $attributeInjectors = [],
+        callable $translateFailHandler = null,
+        callable $listenExprFailHandler = null,
+        callable $validationFailHandler = null
     ) {
         $this->adapter = $adapter;
         $this->translator = $translator;
         $this->validator = $validator;
         $this->attributeInjectors = $attributeInjectors;
+        $this->translateFailHandler = $translateFailHandler;
+        $this->listenExprFailHandler = $listenExprFailHandler;
+        $this->validationFailHandler = $validationFailHandler;
     }
 
     /**
@@ -95,6 +119,66 @@ class EventManager
     }
 
     /**
+     * Set the handler to be called when a message is received but fails to translate to an event.
+     *
+     * @param callable $handler
+     */
+    public function setTranslateFailHandler(callable $handler)
+    {
+        $this->translateFailHandler = $handler;
+    }
+
+    /**
+     * Return the handler which is called when a message is received but fails to translate to an event.
+     *
+     * @return callable|null
+     */
+    public function getTranslateFailHandler()
+    {
+        return $this->translateFailHandler;
+    }
+
+    /**
+     * Set the handler which is called when an event is received but doesn't match the listen expression.
+     *
+     * @param callable $handler
+     */
+    public function setListenExprFailHandler(callable $handler)
+    {
+        $this->listenExprFailHandler = $handler;
+    }
+
+    /**
+     * Return the handler which is called when an event is received but doesn't match the listen expression.
+     *
+     * @return callable|null
+     */
+    public function getListenExprFailHandler()
+    {
+        return $this->listenExprFailHandler;
+    }
+
+    /**
+     * Set the handler which is called when an event is received but fails validation.
+     *
+     * @param callable $handler
+     */
+    public function setValidationFailHandler(callable $handler)
+    {
+        $this->validationFailHandler = $handler;
+    }
+
+    /**
+     * Return the handler which is called when an event is received but fails validation.
+     *
+     * @return callable|null
+     */
+    public function getValidationFailHandler()
+    {
+        return $this->validationFailHandler;
+    }
+
+    /**
      * Listen for an event.
      *
      * @param string $channel
@@ -124,7 +208,22 @@ class EventManager
                 if ($this->validator === null || $this->validator->validates($event)) {
                     // event passed validation
                     call_user_func($handler, $event);
+                } else {
+                    // pass to validation fail handler?
+                    if ($this->validationFailHandler) {
+                        call_user_func($this->validationFailHandler, $event, $this->validator);
+                    }
                 }
+            } else {
+                // pass to listen expr fail handler?
+                if ($this->listenExprFailHandler) {
+                    call_user_func($this->listenExprFailHandler, $event, $expr);
+                }
+            }
+        } else {
+            // pass to translate fail handler?
+            if ($this->translateFailHandler) {
+                call_user_func($this->translateFailHandler, $message);
             }
         }
     }

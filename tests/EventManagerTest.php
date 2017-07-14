@@ -71,6 +71,51 @@ class EventManagerTest extends TestCase
         $this->assertSame($injector2, $injectors[1]);
     }
 
+    public function testGetSetTranslateFailHandler()
+    {
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+        $handler1 = Mockery::mock(\stdClass::class);
+        $callable1 = [$handler1, 'handle'];
+        $manager = new EventManager($adapter, $translator, null, [], $callable1);
+        $this->assertSame($callable1, $manager->getTranslateFailHandler());
+
+        $handler2 = Mockery::mock(\stdClass::class);
+        $callable2 = [$handler2, 'handle'];
+        $manager->setTranslateFailHandler([$handler2, 'handle']);
+        $this->assertSame($callable2, $manager->getTranslateFailHandler());
+    }
+
+    public function testGetSetListenExprFailHandler()
+    {
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+        $handler1 = Mockery::mock(\stdClass::class);
+        $callable1 = [$handler1, 'handle'];
+        $manager = new EventManager($adapter, $translator, null, [], null, $callable1);
+        $this->assertSame($callable1, $manager->getListenExprFailHandler());
+
+        $handler2 = Mockery::mock(\stdClass::class);
+        $callable2 = [$handler2, 'handle'];
+        $manager->setListenExprFailHandler([$handler2, 'handle']);
+        $this->assertSame($callable2, $manager->getListenExprFailHandler());
+    }
+
+    public function testGetSetValidationFailHandler()
+    {
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+        $handler1 = Mockery::mock(\stdClass::class);
+        $callable1 = [$handler1, 'handle'];
+        $manager = new EventManager($adapter, $translator, null, [], null, null, $callable1);
+        $this->assertSame($callable1, $manager->getValidationFailHandler());
+
+        $handler2 = Mockery::mock(\stdClass::class);
+        $callable2 = [$handler2, 'handle'];
+        $manager->setValidationFailHandler([$handler2, 'handle']);
+        $this->assertSame($callable2, $manager->getValidationFailHandler());
+    }
+
     public function testListen()
     {
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
@@ -132,6 +177,27 @@ class EventManagerTest extends TestCase
         $manager->handleSubscribeCallback('message payload', 'user/created', [$handler, 'handle']);
     }
 
+    public function testHandleSubscribeCallbackWhenEventDoesNotTranslateAndHandlerIsCalled()
+    {
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+        $translator->shouldReceive('translate')
+            ->with('message payload')
+            ->andReturn(null);
+
+        $manager = new EventManager($adapter, $translator);
+
+        $translateFailHandler = Mockery::mock(\stdClass::class);
+        $translateFailHandler->shouldReceive('handle')
+            ->with('message payload');
+        $manager->setTranslateFailHandler([$translateFailHandler, 'handle']);
+
+        $handler = Mockery::mock(\stdClass::class);
+
+        $manager->handleSubscribeCallback('message payload', 'user/created', [$handler, 'handle']);
+    }
+
     public function testHandleSubscribeCallbackWhenEventDoesNotMatchListenExpression()
     {
         $event = Mockery::mock(EventInterface::class);
@@ -147,6 +213,35 @@ class EventManagerTest extends TestCase
             ->andReturn($event);
 
         $manager = new EventManager($adapter, $translator);
+
+        $handler = Mockery::mock(\stdClass::class);
+
+        $manager->handleSubscribeCallback('message payload', 'user/created', [$handler, 'handle']);
+    }
+
+    public function testHandleSubscribeCallbackWhenEventDoesNotMatchListenExpressionAndHandlerIsCalled()
+    {
+        $event = Mockery::mock(EventInterface::class);
+        $event->shouldReceive('matches')
+            ->with('user/created')
+            ->andReturn(false);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+        $translator->shouldReceive('translate')
+            ->with('message payload')
+            ->andReturn($event);
+
+        $manager = new EventManager($adapter, $translator);
+
+        $listenExprFailHandler = Mockery::mock(\stdClass::class);
+        $listenExprFailHandler->shouldReceive('handle')
+            ->withArgs([
+                $event,
+                'user/created',
+            ]);
+        $manager->setListenExprFailHandler([$listenExprFailHandler, 'handle']);
 
         $handler = Mockery::mock(\stdClass::class);
 
@@ -196,6 +291,40 @@ class EventManagerTest extends TestCase
             ->andReturn(false);
 
         $manager = new EventManager($adapter, $translator, $validator);
+
+        $handler = Mockery::mock(\stdClass::class);
+
+        $manager->handleSubscribeCallback('message payload', 'user/created', [$handler, 'handle']);
+    }
+
+    public function testHandleSubscribeCallbackWhenValidationFailsAndHandlerIsCalled()
+    {
+        $event = Mockery::mock(EventInterface::class);
+        $event->shouldReceive('matches')
+            ->with('user/created')
+            ->andReturn(true);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+        $translator->shouldReceive('translate')
+            ->with('message payload')
+            ->andReturn($event);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+        $validator->shouldReceive('validates')
+            ->with($event)
+            ->andReturn(false);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+
+        $validationFailHandler = Mockery::mock(\stdClass::class);
+        $validationFailHandler->shouldReceive('handle')
+            ->withArgs([
+                $event,
+                $validator,
+            ]);
+        $manager->setValidationFailHandler([$validationFailHandler, 'handle']);
 
         $handler = Mockery::mock(\stdClass::class);
 
