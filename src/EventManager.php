@@ -104,19 +104,29 @@ class EventManager
     public function listen($channel, $expr, callable $handler)
     {
         $this->adapter->subscribe($channel, function ($message) use ($expr, $handler) {
-            $event = $this->translator->translate($message);
+            $this->handleSubscribeCallback($message, $expr, $handler);
+        });
+    }
 
-            if ($event) {
-                // we were able to translate the message into an event
-                if ($event->matches($expr)) {
-                    // the event matches the listen expression
-                    if ($this->validator === null || $this->validator->validates($event)) {
-                        // event passed validation
-                        call_user_func($handler, $event);
-                    }
+    /**
+     * @param $message
+     * @param $expr
+     * @param callable $handler
+     * @internal
+     */
+    public function handleSubscribeCallback($message, $expr, callable $handler)
+    {
+        $event = $this->translator->translate($message);
+        if ($event) {
+            // we were able to translate the message into an event
+            if ($event->matches($expr)) {
+                // the event matches the listen expression
+                if ($this->validator === null || $this->validator->validates($event)) {
+                    // event passed validation
+                    call_user_func($handler, $event);
                 }
             }
-        });
+        }
     }
 
     /**
