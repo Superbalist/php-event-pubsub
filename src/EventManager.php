@@ -109,8 +109,8 @@ class EventManager
     }
 
     /**
-     * @param $message
-     * @param $expr
+     * @param mixed $message
+     * @param string $expr
      * @param callable $handler
      * @internal
      */
