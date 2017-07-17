@@ -415,6 +415,7 @@ $manager->setListenExprFailHandler(function (\Superbalist\EventPubSub\EventInter
 // hook into validation failures
 $manager->setValidationFailHandler(function (\Superbalist\EventPubSub\ValidationResult $result) {
     // the event failed validation
+    var_dump($result->errors());
 });
 ```
 
