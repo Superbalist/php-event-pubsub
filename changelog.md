@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.1 - ?
+## 3.0.1 - 2017-07-17
 
 * Add support for translate, listen expr & validation failure callbacks
 
