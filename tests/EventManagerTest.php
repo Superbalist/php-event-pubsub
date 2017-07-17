@@ -11,6 +11,7 @@ use Superbalist\EventPubSub\EventManager;
 use Superbalist\EventPubSub\Events\SimpleEvent;
 use Superbalist\EventPubSub\EventValidatorInterface;
 use Superbalist\EventPubSub\MessageTranslatorInterface;
+use Superbalist\EventPubSub\ValidationException;
 use Superbalist\EventPubSub\ValidationResult;
 use Superbalist\PubSub\PubSubAdapterInterface;
 
@@ -115,6 +116,19 @@ class EventManagerTest extends TestCase
         $callable2 = [$handler2, 'handle'];
         $manager->setValidationFailHandler([$handler2, 'handle']);
         $this->assertSame($callable2, $manager->getValidationFailHandler());
+    }
+
+    public function testThrowValidationExceptionsOnDispatch()
+    {
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+        $manager = new EventManager($adapter, $translator);
+
+        $this->assertTrue($manager->throwValidationExceptionsOnDispatch());
+        $this->assertNull($manager->throwValidationExceptionsOnDispatch(false));
+        $this->assertFalse($manager->throwValidationExceptionsOnDispatch());
+        $this->assertNull($manager->throwValidationExceptionsOnDispatch(true));
+        $this->assertTrue($manager->throwValidationExceptionsOnDispatch());
     }
 
     public function testListen()
@@ -360,6 +374,177 @@ class EventManagerTest extends TestCase
         $manager->dispatch('channel', $event);
     }
 
+    public function testDispatchWithValidatorSetAndValidationPasses()
+    {
+        $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publish')
+            ->withArgs([
+                'channel',
+                [
+                    'event' => 'user.created',
+                    'user' => [
+                        'id' => 1234,
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+
+        $validationResult = new ValidationResult($validator, $event, true);
+
+        $validator->shouldReceive('validate')
+            ->with($event)
+            ->andReturn($validationResult);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+
+        $manager->dispatch('channel', $event);
+    }
+
+    public function testDispatchWithValidatorSetAndValidationFails()
+    {
+        $this->expectException(ValidationException::class);
+
+        $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publish')
+            ->withArgs([
+                'channel',
+                [
+                    'event' => 'user.created',
+                    'user' => [
+                        'id' => 1234,
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+
+        $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
+
+        $validator->shouldReceive('validate')
+            ->with($event)
+            ->andReturn($validationResult);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+
+        $manager->dispatch('channel', $event);
+    }
+
+    public function testDispatchWithValidatorSetAndValidationFailsAndExceptionIsSuppressed()
+    {
+        $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publish')
+            ->withArgs([
+                'channel',
+                [
+                    'event' => 'user.created',
+                    'user' => [
+                        'id' => 1234,
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+
+        $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
+
+        $validator->shouldReceive('validate')
+            ->with($event)
+            ->andReturn($validationResult);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+        $manager->throwValidationExceptionsOnDispatch(false);
+
+        $manager->dispatch('channel', $event);
+    }
+
+    public function testDispatchWithValidatorSetAndValidationFailsAndHandlerIsCalled()
+    {
+        $this->expectException(ValidationException::class);
+
+        $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publish')
+            ->withArgs([
+                'channel',
+                [
+                    'event' => 'user.created',
+                    'user' => [
+                        'id' => 1234,
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+
+        $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
+
+        $validator->shouldReceive('validate')
+            ->with($event)
+            ->andReturn($validationResult);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+
+        $validationFailHandler = Mockery::mock(\stdClass::class);
+        $validationFailHandler->shouldReceive('handle')
+            ->with($validationResult);
+        $manager->setValidationFailHandler([$validationFailHandler, 'handle']);
+
+        $manager->dispatch('channel', $event);
+    }
+
+    public function testDispatchWithValidatorSetAndValidationFailsAndHandlerIsCalledAndExceptionIsSuppressed()
+    {
+        $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publish')
+            ->withArgs([
+                'channel',
+                [
+                    'event' => 'user.created',
+                    'user' => [
+                        'id' => 1234,
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+
+        $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
+
+        $validator->shouldReceive('validate')
+            ->with($event)
+            ->andReturn($validationResult);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+        $manager->throwValidationExceptionsOnDispatch(false);
+
+        $validationFailHandler = Mockery::mock(\stdClass::class);
+        $validationFailHandler->shouldReceive('handle')
+            ->with($validationResult);
+        $manager->setValidationFailHandler([$validationFailHandler, 'handle']);
+
+        $manager->dispatch('channel', $event);
+    }
+
     public function testDispatchWithInjections()
     {
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
@@ -453,6 +638,292 @@ class EventManagerTest extends TestCase
         $events = [
             new SimpleEvent('user.created', ['user' => ['id' => 1234]]),
             new SimpleEvent('user.created', ['user' => ['id' => 7812]]),
+        ];
+        $manager->dispatchBatch('channel', $events);
+    }
+
+    public function testDispatchBatchWithValidatorSetAndValidationPasses()
+    {
+        $event1 = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+        $event2 = new SimpleEvent('user.updated', ['user' => ['id' => 7812]]);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publishBatch')
+            ->withArgs([
+                'channel',
+                [
+                    [
+                        'event' => 'user.created',
+                        'user' => [
+                            'id' => 1234,
+                        ],
+                    ],
+                    [
+                        'event' => 'user.updated',
+                        'user' => [
+                            'id' => 7812,
+                        ],
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+
+        $validationResult1 = new ValidationResult($validator, $event1, true);
+        $validationResult2 = new ValidationResult($validator, $event2, true);
+
+        $validator->shouldReceive('validate')
+            ->with(Mockery::on(function ($attribute) {
+                return $attribute instanceof SimpleEvent
+                    && $attribute->getName() === 'user.created';
+            }))
+            ->andReturn($validationResult1);
+        $validator->shouldReceive('validate')
+            ->with(Mockery::on(function ($attribute) {
+                return $attribute instanceof SimpleEvent
+                    && $attribute->getName() === 'user.updated';
+            }))
+            ->andReturn($validationResult2);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+
+        $events = [
+            $event1,
+            $event2,
+        ];
+        $manager->dispatchBatch('channel', $events);
+    }
+
+    public function testDispatchBatchWithValidatorSetAndValidationFails()
+    {
+        $this->expectException(ValidationException::class);
+
+        $event1 = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+        $event2 = new SimpleEvent('user.updated', ['user' => ['id' => 7812]]);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publishBatch')
+            ->withArgs([
+                'channel',
+                [
+                    [
+                        'event' => 'user.created',
+                        'user' => [
+                            'id' => 1234,
+                        ],
+                    ],
+                    [
+                        'event' => 'user.updated',
+                        'user' => [
+                            'id' => 7812,
+                        ],
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+
+        $validationResult1 = new ValidationResult($validator, $event1, true);
+        $validationResult2 = new ValidationResult($validator, $event2, false, ['Required properties missing: ["user"]']);
+
+        $validator->shouldReceive('validate')
+            ->with(Mockery::on(function ($attribute) {
+                return $attribute instanceof SimpleEvent
+                    && $attribute->getName() === 'user.created';
+            }))
+            ->andReturn($validationResult1);
+        $validator->shouldReceive('validate')
+            ->with(Mockery::on(function ($attribute) {
+                return $attribute instanceof SimpleEvent
+                    && $attribute->getName() === 'user.updated';
+            }))
+            ->andReturn($validationResult2);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+
+        $events = [
+            $event1,
+            $event2,
+        ];
+        $manager->dispatchBatch('channel', $events);
+    }
+
+    public function testDispatchBatchWithValidatorSetAndValidationFailsAndExceptionIsSuppressed()
+    {
+        $event1 = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+        $event2 = new SimpleEvent('user.updated', ['user' => ['id' => 7812]]);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publishBatch')
+            ->withArgs([
+                'channel',
+                [
+                    [
+                        'event' => 'user.created',
+                        'user' => [
+                            'id' => 1234,
+                        ],
+                    ],
+                    [
+                        'event' => 'user.updated',
+                        'user' => [
+                            'id' => 7812,
+                        ],
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+
+        $validationResult1 = new ValidationResult($validator, $event1, true);
+        $validationResult2 = new ValidationResult($validator, $event2, false, ['Required properties missing: ["user"]']);
+
+        $validator->shouldReceive('validate')
+            ->with(Mockery::on(function ($attribute) {
+                return $attribute instanceof SimpleEvent
+                    && $attribute->getName() === 'user.created';
+            }))
+            ->andReturn($validationResult1);
+        $validator->shouldReceive('validate')
+            ->with(Mockery::on(function ($attribute) {
+                return $attribute instanceof SimpleEvent
+                    && $attribute->getName() === 'user.updated';
+            }))
+            ->andReturn($validationResult2);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+        $manager->throwValidationExceptionsOnDispatch(false);
+
+        $events = [
+            $event1,
+            $event2,
+        ];
+        $manager->dispatchBatch('channel', $events);
+    }
+
+    public function testDispatchBatchWithValidatorSetAndValidationFailsAndHandlerIsCalled()
+    {
+        $this->expectException(ValidationException::class);
+
+        $event1 = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+        $event2 = new SimpleEvent('user.updated', ['user' => ['id' => 7812]]);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publishBatch')
+            ->withArgs([
+                'channel',
+                [
+                    [
+                        'event' => 'user.created',
+                        'user' => [
+                            'id' => 1234,
+                        ],
+                    ],
+                    [
+                        'event' => 'user.updated',
+                        'user' => [
+                            'id' => 7812,
+                        ],
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+
+        $validationResult1 = new ValidationResult($validator, $event1, true);
+        $validationResult2 = new ValidationResult($validator, $event2, false, ['Required properties missing: ["user"]']);
+
+        $validator->shouldReceive('validate')
+            ->with(Mockery::on(function ($attribute) {
+                return $attribute instanceof SimpleEvent
+                    && $attribute->getName() === 'user.created';
+            }))
+            ->andReturn($validationResult1);
+        $validator->shouldReceive('validate')
+            ->with(Mockery::on(function ($attribute) {
+                return $attribute instanceof SimpleEvent
+                    && $attribute->getName() === 'user.updated';
+            }))
+            ->andReturn($validationResult2);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+
+        $validationFailHandler = Mockery::mock(\stdClass::class);
+        $validationFailHandler->shouldReceive('handle')
+            ->with($validationResult2);
+        $manager->setValidationFailHandler([$validationFailHandler, 'handle']);
+
+        $events = [
+            $event1,
+            $event2,
+        ];
+        $manager->dispatchBatch('channel', $events);
+    }
+
+    public function testDispatchBatchWithValidatorSetAndValidationFailsAndHandlerIsCalledAndExceptionIsSuppressed()
+    {
+        $event1 = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+        $event2 = new SimpleEvent('user.updated', ['user' => ['id' => 7812]]);
+
+        $adapter = Mockery::mock(PubSubAdapterInterface::class);
+        $adapter->shouldReceive('publishBatch')
+            ->withArgs([
+                'channel',
+                [
+                    [
+                        'event' => 'user.created',
+                        'user' => [
+                            'id' => 1234,
+                        ],
+                    ],
+                    [
+                        'event' => 'user.updated',
+                        'user' => [
+                            'id' => 7812,
+                        ],
+                    ],
+                ],
+            ]);
+
+        $translator = Mockery::mock(MessageTranslatorInterface::class);
+
+        $validator = Mockery::mock(EventValidatorInterface::class);
+
+        $validationResult1 = new ValidationResult($validator, $event1, true);
+        $validationResult2 = new ValidationResult($validator, $event2, false, ['Required properties missing: ["user"]']);
+
+        $validator->shouldReceive('validate')
+            ->with(Mockery::on(function ($attribute) {
+                return $attribute instanceof SimpleEvent
+                    && $attribute->getName() === 'user.created';
+            }))
+            ->andReturn($validationResult1);
+        $validator->shouldReceive('validate')
+            ->with(Mockery::on(function ($attribute) {
+                return $attribute instanceof SimpleEvent
+                    && $attribute->getName() === 'user.updated';
+            }))
+            ->andReturn($validationResult2);
+
+        $manager = new EventManager($adapter, $translator, $validator);
+        $manager->throwValidationExceptionsOnDispatch(false);
+
+        $validationFailHandler = Mockery::mock(\stdClass::class);
+        $validationFailHandler->shouldReceive('handle')
+            ->with($validationResult2);
+        $manager->setValidationFailHandler([$validationFailHandler, 'handle']);
+
+        $events = [
+            $event1,
+            $event2,
         ];
         $manager->dispatchBatch('channel', $events);
     }

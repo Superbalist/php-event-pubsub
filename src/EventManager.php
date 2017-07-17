@@ -42,6 +42,11 @@ class EventManager
     protected $validationFailHandler;
 
     /**
+     * @var bool
+     */
+    protected $throwValidationExceptionsOnDispatch = true;
+
+    /**
      * @param PubSubAdapterInterface $adapter
      * @param MessageTranslatorInterface $translator
      * @param EventValidatorInterface|null $validator
@@ -159,7 +164,7 @@ class EventManager
     }
 
     /**
-     * Set the handler which is called when an event is received but fails validation.
+     * Set the handler which is called when an event is dispatched or received but fails validation.
      *
      * @param callable $handler
      */
@@ -169,13 +174,26 @@ class EventManager
     }
 
     /**
-     * Return the handler which is called when an event is received but fails validation.
+     * Return the handler which is called when an event is dispatched or received but fails validation.
      *
      * @return callable|null
      */
     public function getValidationFailHandler()
     {
         return $this->validationFailHandler;
+    }
+
+    /**
+     * @param bool|null $bool
+     * @return mixed
+     */
+    public function throwValidationExceptionsOnDispatch($bool = null)
+    {
+        if ($bool === null) {
+            return $this->throwValidationExceptionsOnDispatch;
+        } else {
+            $this->throwValidationExceptionsOnDispatch = $bool;
+        }
     }
 
     /**
@@ -277,10 +295,25 @@ class EventManager
      *
      * @param string $channel
      * @param EventInterface $event
+     * @throws ValidationException
      */
     public function dispatch($channel, EventInterface $event)
     {
         $e = $this->prepEventForDispatch($event);
+        if ($this->validator) {
+            $result = $this->validator->validate($event);
+            if ($result->fails()) {
+                // pass to validation fail handler?
+                if ($this->validationFailHandler) {
+                    call_user_func($this->validationFailHandler, $result);
+                }
+
+                if ($this->throwValidationExceptionsOnDispatch) {
+                    throw new ValidationException($result);
+                }
+            }
+        }
+
         $this->adapter->publish($channel, $e->toMessage());
     }
 
@@ -289,13 +322,33 @@ class EventManager
      *
      * @param string $channel
      * @param array $events
+     * @throws ValidationException
      */
     public function dispatchBatch($channel, array $events)
     {
-        $messages = array_map(function (EventInterface $event) {
+        $messages = [];
+
+        foreach ($events as $event) {
+            /** @var EventInterface $event */
             $event = $this->prepEventForDispatch($event);
-            return $event->toMessage();
-        }, $events);
+
+            if ($this->validator) {
+                $result = $this->validator->validate($event);
+                if ($result->fails()) {
+                    // pass to validation fail handler?
+                    if ($this->validationFailHandler) {
+                        call_user_func($this->validationFailHandler, $result);
+                    }
+
+                    if ($this->throwValidationExceptionsOnDispatch) {
+                        throw new ValidationException($result);
+                    }
+                }
+            }
+
+            $messages[] = $event->toMessage();
+        }
+
         $this->adapter->publishBatch($channel, $messages);
     }
 }
