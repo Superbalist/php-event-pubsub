@@ -196,6 +196,7 @@ class EventManager
      * @param mixed $message
      * @param string $expr
      * @param callable $handler
+     *
      * @internal
      */
     public function handleSubscribeCallback($message, $expr, callable $handler)
