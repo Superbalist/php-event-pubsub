@@ -185,6 +185,7 @@ class EventManager
 
     /**
      * @param bool|null $bool
+     *
      * @return mixed
      */
     public function throwValidationExceptionsOnDispatch($bool = null)
@@ -295,6 +296,7 @@ class EventManager
      *
      * @param string $channel
      * @param EventInterface $event
+     *
      * @throws ValidationException
      */
     public function dispatch($channel, EventInterface $event)
@@ -322,6 +324,7 @@ class EventManager
      *
      * @param string $channel
      * @param array $events
+     *
      * @throws ValidationException
      */
     public function dispatchBatch($channel, array $events)
