@@ -389,6 +389,35 @@ $manager->addAttributeInjector(function () {
 });
 ```
 
+## Error Handling
+
+The library supports error handlers for when event translation fails, listen expression fails and validation fails.
+
+You can pass callables into the EventManager constructor, or set them as follows:
+
+```php
+// create a new event manager
+$adapter = new \Superbalist\PubSub\Adapters\LocalPubSubAdapter();
+$translator = new \Superbalist\EventPubSub\Translators\SimpleEventMessageTranslator();
+$manager = new \Superbalist\EventPubSub\EventManager($adapter, $translator);
+
+// hook into translation failures
+$manager->setTranslateFailHandler(function ($message) {
+    // the message failed to translate into an event
+});
+
+// hook into listen expression failures
+$manager->setListenExprFailHandler(function (\Superbalist\EventPubSub\EventInterface $event, $expr) {
+    // the event didn't match the listen expression
+    // this isn't really an error, but can be useful for debug
+});
+
+// hook into validation failures
+$manager->setValidationFailHandler(function (\Superbalist\EventPubSub\EventInterface $event, \Superbalist\EventPubSub\EventValidatorInterface $validator) {
+    // the event failed validation
+});
+```
+
 ## Examples
 
 The library comes with [examples](examples) for the different types of events and a [Dockerfile](Dockerfile) for
