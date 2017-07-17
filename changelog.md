@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.0.0 - ?
+## 4.0.0 - 2017-07-17
 
 * EventValidatorInterface->validates() renamed to ->validate()
 * EventValidatorInterface->validate() now returns a ValidationResult instance instead of bool
