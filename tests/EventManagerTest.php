@@ -11,6 +11,7 @@ use Superbalist\EventPubSub\EventManager;
 use Superbalist\EventPubSub\Events\SimpleEvent;
 use Superbalist\EventPubSub\EventValidatorInterface;
 use Superbalist\EventPubSub\MessageTranslatorInterface;
+use Superbalist\EventPubSub\ValidationResult;
 use Superbalist\PubSub\PubSubAdapterInterface;
 
 class EventManagerTest extends TestCase
@@ -148,9 +149,12 @@ class EventManagerTest extends TestCase
             ->andReturn($event);
 
         $validator = Mockery::mock(EventValidatorInterface::class);
-        $validator->shouldReceive('validates')
+
+        $validationResult = new ValidationResult($validator, $event, true);
+
+        $validator->shouldReceive('validate')
             ->with($event)
-            ->andReturn(true);
+            ->andReturn($validationResult);
 
         $manager = new EventManager($adapter, $translator, $validator);
 
@@ -286,9 +290,12 @@ class EventManagerTest extends TestCase
             ->andReturn($event);
 
         $validator = Mockery::mock(EventValidatorInterface::class);
-        $validator->shouldReceive('validates')
+
+        $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
+
+        $validator->shouldReceive('validate')
             ->with($event)
-            ->andReturn(false);
+            ->andReturn($validationResult);
 
         $manager = new EventManager($adapter, $translator, $validator);
 
@@ -312,18 +319,18 @@ class EventManagerTest extends TestCase
             ->andReturn($event);
 
         $validator = Mockery::mock(EventValidatorInterface::class);
-        $validator->shouldReceive('validates')
+
+        $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
+
+        $validator->shouldReceive('validate')
             ->with($event)
-            ->andReturn(false);
+            ->andReturn($validationResult);
 
         $manager = new EventManager($adapter, $translator, $validator);
 
         $validationFailHandler = Mockery::mock(\stdClass::class);
         $validationFailHandler->shouldReceive('handle')
-            ->withArgs([
-                $event,
-                $validator,
-            ]);
+            ->with($validationResult);
         $manager->setValidationFailHandler([$validationFailHandler, 'handle']);
 
         $handler = Mockery::mock(\stdClass::class);

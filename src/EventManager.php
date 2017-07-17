@@ -206,13 +206,19 @@ class EventManager
             // we were able to translate the message into an event
             if ($event->matches($expr)) {
                 // the event matches the listen expression
-                if ($this->validator === null || $this->validator->validates($event)) {
-                    // event passed validation
+                if ($this->validator === null) {
+                    // nothing to validate
                     call_user_func($handler, $event);
                 } else {
-                    // pass to validation fail handler?
-                    if ($this->validationFailHandler) {
-                        call_user_func($this->validationFailHandler, $event, $this->validator);
+                    $result = $this->validator->validate($event);
+                    if ($result->passes()) {
+                        // event validates!
+                        call_user_func($handler, $event);
+                    } else {
+                        // pass to validation fail handler?
+                        if ($this->validationFailHandler) {
+                            call_user_func($this->validationFailHandler, $result);
+                        }
                     }
                 }
             } else {

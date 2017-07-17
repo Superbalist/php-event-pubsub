@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.0 - ?
+
+* EventValidatorInterface->validates() renamed to ->validate()
+* EventValidatorInterface->validate() now returns a ValidationResult instance instead of bool
+* The validation fail handler callback now receives a ValidationResult instead of the event and a validator
+
 ## 3.0.1 - 2017-07-17
 
 * Add support for translate, listen expr & validation failure callbacks
