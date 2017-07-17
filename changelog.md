@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.0.0 - 2017-07-17
+
+* EventValidatorInterface->validates() renamed to ->validate()
+* EventValidatorInterface->validate() now returns a ValidationResult instance instead of bool
+* The validation fail handler callback now receives a ValidationResult instead of the event and a validator
+* Events are now validated on dispatch, and will throw a ValidationException if throwValidationExceptionsOnDispatch is true (defaults to true)
+* Added new throwValidationExceptionsOnDispatch(bool) method to EventManager to suppress validation exceptions on dispatch
+
 ## 3.0.1 - 2017-07-17
 
 * Add support for translate, listen expr & validation failure callbacks

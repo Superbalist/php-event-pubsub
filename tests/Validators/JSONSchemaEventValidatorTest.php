@@ -3,15 +3,17 @@
 namespace Tests\Validators;
 
 use League\JsonGuard\Dereferencer;
+use League\JsonGuard\Validator;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 use Superbalist\EventPubSub\Events\SchemaEvent;
 use Superbalist\EventPubSub\Events\SimpleEvent;
+use Superbalist\EventPubSub\ValidationResult;
 use Superbalist\EventPubSub\Validators\JSONSchemaEventValidator;
 
 class JSONSchemaEventValidatorTest extends TestCase
 {
-    public function testValidates()
+    public function testValidate()
     {
         $dereferencer = Mockery::mock(Dereferencer::class);
         $dereferencer->shouldReceive('dereference')
@@ -23,23 +25,22 @@ class JSONSchemaEventValidatorTest extends TestCase
 
         $event = $this->makeTestEvent();
 
-        $this->assertTrue($validator->validates($event));
+        $result = $validator->validate($event);
+        $this->assertInstanceOf(ValidationResult::class, $result);
+        $this->assertSame($validator, $result->getValidator());
+        $this->assertSame($event, $result->getEvent());
+        $this->assertTrue($result->passes());
+        $this->assertFalse($result->fails());
+        $this->assertEmpty($result->getErrors());
     }
 
-    public function testIsValidAgainstSchema()
+    public function testValidateWhenJsonIsInvalid()
     {
         $dereferencer = Mockery::mock(Dereferencer::class);
-
-        $validator = new JSONSchemaEventValidator($dereferencer);
-
-        $event = $this->makeTestEvent();
-
-        $this->assertTrue($validator->isValidAgainstSchema($event, $this->getMockSchema()));
-    }
-
-    public function testIsValidAgainstSchemaWhenJsonIsInvalid()
-    {
-        $dereferencer = Mockery::mock(Dereferencer::class);
+        $dereferencer->shouldReceive('dereference')
+            ->with('http://schemas.my-website.org/events/user/created/1.0.json')
+            ->once()
+            ->andReturn($this->getMockSchema());
 
         $validator = new JSONSchemaEventValidator($dereferencer);
 
@@ -50,7 +51,29 @@ class JSONSchemaEventValidatorTest extends TestCase
             ]
         );
 
-        $this->assertFalse($validator->isValidAgainstSchema($event, $this->getMockSchema()));
+        $result = $validator->validate($event);
+        $this->assertInstanceOf(ValidationResult::class, $result);
+        $this->assertSame($validator, $result->getValidator());
+        $this->assertSame($event, $result->getEvent());
+        $this->assertFalse($result->passes());
+        $this->assertTrue($result->fails());
+        $this->assertEquals(
+            ['Required properties missing: ["user"]'],
+            $result->errors()
+        );
+    }
+
+    public function testMakeSchemaValidator()
+    {
+        $dereferencer = Mockery::mock(Dereferencer::class);
+
+        $validator = new JSONSchemaEventValidator($dereferencer);
+
+        $event = $this->makeTestEvent();
+
+        $schemaValidator = $validator->makeSchemaValidator($event, $this->getMockSchema());
+
+        $this->assertInstanceOf(Validator::class, $schemaValidator);
     }
 
     public function testGetEventSchema()

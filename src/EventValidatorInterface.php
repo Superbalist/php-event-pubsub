@@ -7,7 +7,7 @@ interface EventValidatorInterface
     /**
      * @param EventInterface $event
      *
-     * @return bool
+     * @return ValidationResult
      */
-    public function validates(EventInterface $event);
+    public function validate(EventInterface $event);
 }

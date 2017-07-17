@@ -3,10 +3,12 @@
 namespace Superbalist\EventPubSub\Validators;
 
 use League\JsonGuard\Dereferencer;
+use League\JsonGuard\ValidationError;
 use League\JsonGuard\Validator;
 use Superbalist\EventPubSub\EventInterface;
 use Superbalist\EventPubSub\Events\SchemaEvent;
 use Superbalist\EventPubSub\EventValidatorInterface;
+use Superbalist\EventPubSub\ValidationResult;
 
 class JSONSchemaEventValidator implements EventValidatorInterface
 {
@@ -26,24 +28,35 @@ class JSONSchemaEventValidator implements EventValidatorInterface
     /**
      * @param EventInterface $event
      *
-     * @return bool
+     * @return ValidationResult
      */
-    public function validates(EventInterface $event)
+    public function validate(EventInterface $event)
     {
         $schema = $this->getEventSchema($event);
         if ($schema === null) {
-            return true;
+            return new ValidationResult($this, $event, true);
         }
-        return $this->isValidAgainstSchema($event, $schema);
+
+        $schemaValidator = $this->makeSchemaValidator($event, $schema);
+        if ($schemaValidator->passes()) {
+            return new ValidationResult($this, $event, true);
+        } else {
+            $errors = [];
+            foreach ($schemaValidator->errors() as $error) {
+                /* @var ValidationError $error */
+                $errors[] = $error->getMessage();
+            }
+            return new ValidationResult($this, $event, false, $errors);
+        }
     }
 
     /**
      * @param EventInterface $event
      * @param object $schema
      *
-     * @return bool
+     * @return Validator
      */
-    public function isValidAgainstSchema(EventInterface $event, $schema)
+    public function makeSchemaValidator(EventInterface $event, $schema)
     {
         // we can't validate on an array, only an object
         // so we need to convert the event payload to an object
@@ -51,9 +64,7 @@ class JSONSchemaEventValidator implements EventValidatorInterface
         $payload = json_encode($payload); // back to json
         $payload = json_decode($payload); // from json to an object
 
-        $validator = new Validator($payload, $schema);
-
-        return $validator->passes();
+        return new Validator($payload, $schema);
     }
 
     /**

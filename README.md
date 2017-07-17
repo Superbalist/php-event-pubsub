@@ -294,9 +294,9 @@ Your validator must implement the following methods.
 ```php
 /**
  * @param EventInterface $event
- * @return bool
+ * @return ValidationResult
  */
-public function validates(EventInterface $event);
+public function validate(EventInterface $event);
 ```
 
 ## Attribute Injectors
@@ -413,8 +413,9 @@ $manager->setListenExprFailHandler(function (\Superbalist\EventPubSub\EventInter
 });
 
 // hook into validation failures
-$manager->setValidationFailHandler(function (\Superbalist\EventPubSub\EventInterface $event, \Superbalist\EventPubSub\EventValidatorInterface $validator) {
+$manager->setValidationFailHandler(function (\Superbalist\EventPubSub\ValidationResult $result) {
     // the event failed validation
+    var_dump($result->errors());
 });
 ```
 
