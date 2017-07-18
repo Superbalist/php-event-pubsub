@@ -304,7 +304,9 @@ class EventManager
         $e = $this->prepEventForDispatch($event);
         if ($this->validator) {
             $result = $this->validator->validate($event);
-            if ($result->fails()) {
+            if ($result->passes()) {
+                $this->adapter->publish($channel, $e->toMessage());
+            } else {
                 // pass to validation fail handler?
                 if ($this->validationFailHandler) {
                     call_user_func($this->validationFailHandler, $result);
@@ -314,9 +316,9 @@ class EventManager
                     throw new ValidationException($result);
                 }
             }
+        } else {
+            $this->adapter->publish($channel, $e->toMessage());
         }
-
-        $this->adapter->publish($channel, $e->toMessage());
     }
 
     /**
@@ -330,6 +332,7 @@ class EventManager
     public function dispatchBatch($channel, array $events)
     {
         $messages = [];
+        $validates = true;
 
         foreach ($events as $event) {
             /** @var EventInterface $event */
@@ -338,6 +341,8 @@ class EventManager
             if ($this->validator) {
                 $result = $this->validator->validate($event);
                 if ($result->fails()) {
+                    $validates = false;
+
                     // pass to validation fail handler?
                     if ($this->validationFailHandler) {
                         call_user_func($this->validationFailHandler, $result);
@@ -352,6 +357,8 @@ class EventManager
             $messages[] = $event->toMessage();
         }
 
-        $this->adapter->publishBatch($channel, $messages);
+        if ($validates) {
+            $this->adapter->publishBatch($channel, $messages);
+        }
     }
 }

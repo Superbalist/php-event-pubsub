@@ -443,16 +443,6 @@ class EventManagerTest extends TestCase
         $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
 
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
-        $adapter->shouldReceive('publish')
-            ->withArgs([
-                'channel',
-                [
-                    'event' => 'user.created',
-                    'user' => [
-                        'id' => 1234,
-                    ],
-                ],
-            ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
 
@@ -477,16 +467,6 @@ class EventManagerTest extends TestCase
         $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
 
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
-        $adapter->shouldReceive('publish')
-            ->withArgs([
-                'channel',
-                [
-                    'event' => 'user.created',
-                    'user' => [
-                        'id' => 1234,
-                    ],
-                ],
-            ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
 
@@ -513,16 +493,6 @@ class EventManagerTest extends TestCase
         $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
 
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
-        $adapter->shouldReceive('publish')
-            ->withArgs([
-                'channel',
-                [
-                    'event' => 'user.created',
-                    'user' => [
-                        'id' => 1234,
-                    ],
-                ],
-            ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
 
@@ -704,24 +674,6 @@ class EventManagerTest extends TestCase
         $event2 = new SimpleEvent('user.updated', ['user' => ['id' => 7812]]);
 
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
-        $adapter->shouldReceive('publishBatch')
-            ->withArgs([
-                'channel',
-                [
-                    [
-                        'event' => 'user.created',
-                        'user' => [
-                            'id' => 1234,
-                        ],
-                    ],
-                    [
-                        'event' => 'user.updated',
-                        'user' => [
-                            'id' => 7812,
-                        ],
-                    ],
-                ],
-            ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
 
@@ -758,24 +710,6 @@ class EventManagerTest extends TestCase
         $event2 = new SimpleEvent('user.updated', ['user' => ['id' => 7812]]);
 
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
-        $adapter->shouldReceive('publishBatch')
-            ->withArgs([
-                'channel',
-                [
-                    [
-                        'event' => 'user.created',
-                        'user' => [
-                            'id' => 1234,
-                        ],
-                    ],
-                    [
-                        'event' => 'user.updated',
-                        'user' => [
-                            'id' => 7812,
-                        ],
-                    ],
-                ],
-            ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
 
@@ -815,24 +749,6 @@ class EventManagerTest extends TestCase
         $event2 = new SimpleEvent('user.updated', ['user' => ['id' => 7812]]);
 
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
-        $adapter->shouldReceive('publishBatch')
-            ->withArgs([
-                'channel',
-                [
-                    [
-                        'event' => 'user.created',
-                        'user' => [
-                            'id' => 1234,
-                        ],
-                    ],
-                    [
-                        'event' => 'user.updated',
-                        'user' => [
-                            'id' => 7812,
-                        ],
-                    ],
-                ],
-            ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
 
@@ -874,24 +790,6 @@ class EventManagerTest extends TestCase
         $event2 = new SimpleEvent('user.updated', ['user' => ['id' => 7812]]);
 
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
-        $adapter->shouldReceive('publishBatch')
-            ->withArgs([
-                'channel',
-                [
-                    [
-                        'event' => 'user.created',
-                        'user' => [
-                            'id' => 1234,
-                        ],
-                    ],
-                    [
-                        'event' => 'user.updated',
-                        'user' => [
-                            'id' => 7812,
-                        ],
-                    ],
-                ],
-            ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
 
