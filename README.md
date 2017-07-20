@@ -274,7 +274,7 @@ public function translate($message);
 
 ## Validators
 
-A validator is an optional component used to validate an incoming event.
+A validator is an optional component used to validate an event upon dispatch.
 
 ### JSONSchemaEventValidator
 

@@ -3,6 +3,7 @@
 ## 4.0.2 - 2017-07-20
 
 * Fix events not being validated correctly when attribute injectors are used
+* Events are no longer validated when received, only upon dispatch
 
 ## 4.0.1 - 2017-07-18
 

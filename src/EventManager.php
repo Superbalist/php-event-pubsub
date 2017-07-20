@@ -164,7 +164,7 @@ class EventManager
     }
 
     /**
-     * Set the handler which is called when an event is dispatched or received but fails validation.
+     * Set the handler which is called when an event is dispatched but fails validation.
      *
      * @param callable $handler
      */
@@ -174,7 +174,7 @@ class EventManager
     }
 
     /**
-     * Return the handler which is called when an event is dispatched or received but fails validation.
+     * Return the handler which is called when an event is dispatched but fails validation.
      *
      * @return callable|null
      */
@@ -225,21 +225,7 @@ class EventManager
             // we were able to translate the message into an event
             if ($event->matches($expr)) {
                 // the event matches the listen expression
-                if ($this->validator === null) {
-                    // nothing to validate
-                    call_user_func($handler, $event);
-                } else {
-                    $result = $this->validator->validate($event);
-                    if ($result->passes()) {
-                        // event validates!
-                        call_user_func($handler, $event);
-                    } else {
-                        // pass to validation fail handler?
-                        if ($this->validationFailHandler) {
-                            call_user_func($this->validationFailHandler, $result);
-                        }
-                    }
-                }
+                call_user_func($handler, $event);
             } else {
                 // pass to listen expr fail handler?
                 if ($this->listenExprFailHandler) {

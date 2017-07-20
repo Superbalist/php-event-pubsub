@@ -162,15 +162,7 @@ class EventManagerTest extends TestCase
             ->with('message payload')
             ->andReturn($event);
 
-        $validator = Mockery::mock(EventValidatorInterface::class);
-
-        $validationResult = new ValidationResult($validator, $event, true);
-
-        $validator->shouldReceive('validate')
-            ->with($event)
-            ->andReturn($validationResult);
-
-        $manager = new EventManager($adapter, $translator, $validator);
+        $manager = new EventManager($adapter, $translator);
 
         $handler = Mockery::mock(\stdClass::class);
         $handler->shouldReceive('handle')
@@ -260,92 +252,6 @@ class EventManagerTest extends TestCase
                 'user/created',
             ]);
         $manager->setListenExprFailHandler([$listenExprFailHandler, 'handle']);
-
-        $handler = Mockery::mock(\stdClass::class);
-
-        $manager->handleSubscribeCallback('message payload', 'user/created', [$handler, 'handle']);
-    }
-
-    public function testHandleSubscribeCallbackWithoutValidator()
-    {
-        $event = Mockery::mock(EventInterface::class);
-        $event->shouldReceive('matches')
-            ->with('user/created')
-            ->andReturn(true);
-
-        $adapter = Mockery::mock(PubSubAdapterInterface::class);
-
-        $translator = Mockery::mock(MessageTranslatorInterface::class);
-        $translator->shouldReceive('translate')
-            ->with('message payload')
-            ->andReturn($event);
-
-        $manager = new EventManager($adapter, $translator);
-
-        $handler = Mockery::mock(\stdClass::class);
-        $handler->shouldReceive('handle')
-            ->with($event);
-
-        $manager->handleSubscribeCallback('message payload', 'user/created', [$handler, 'handle']);
-    }
-
-    public function testHandleSubscribeCallbackWhenValidationFails()
-    {
-        $event = Mockery::mock(EventInterface::class);
-        $event->shouldReceive('matches')
-            ->with('user/created')
-            ->andReturn(true);
-
-        $adapter = Mockery::mock(PubSubAdapterInterface::class);
-
-        $translator = Mockery::mock(MessageTranslatorInterface::class);
-        $translator->shouldReceive('translate')
-            ->with('message payload')
-            ->andReturn($event);
-
-        $validator = Mockery::mock(EventValidatorInterface::class);
-
-        $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
-
-        $validator->shouldReceive('validate')
-            ->with($event)
-            ->andReturn($validationResult);
-
-        $manager = new EventManager($adapter, $translator, $validator);
-
-        $handler = Mockery::mock(\stdClass::class);
-
-        $manager->handleSubscribeCallback('message payload', 'user/created', [$handler, 'handle']);
-    }
-
-    public function testHandleSubscribeCallbackWhenValidationFailsAndHandlerIsCalled()
-    {
-        $event = Mockery::mock(EventInterface::class);
-        $event->shouldReceive('matches')
-            ->with('user/created')
-            ->andReturn(true);
-
-        $adapter = Mockery::mock(PubSubAdapterInterface::class);
-
-        $translator = Mockery::mock(MessageTranslatorInterface::class);
-        $translator->shouldReceive('translate')
-            ->with('message payload')
-            ->andReturn($event);
-
-        $validator = Mockery::mock(EventValidatorInterface::class);
-
-        $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
-
-        $validator->shouldReceive('validate')
-            ->with($event)
-            ->andReturn($validationResult);
-
-        $manager = new EventManager($adapter, $translator, $validator);
-
-        $validationFailHandler = Mockery::mock(\stdClass::class);
-        $validationFailHandler->shouldReceive('handle')
-            ->with($validationResult);
-        $manager->setValidationFailHandler([$validationFailHandler, 'handle']);
 
         $handler = Mockery::mock(\stdClass::class);
 
