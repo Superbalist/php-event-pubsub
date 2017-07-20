@@ -378,16 +378,19 @@ class EventManagerTest extends TestCase
     {
         $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
 
+        $expectedEventMessage = [
+            'event' => 'user.created',
+            'user' => [
+                'id' => 1234,
+            ],
+            'i_r' => 'an injected attribute',
+        ];
+
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
         $adapter->shouldReceive('publish')
             ->withArgs([
                 'channel',
-                [
-                    'event' => 'user.created',
-                    'user' => [
-                        'id' => 1234,
-                    ],
-                ],
+                $expectedEventMessage,
             ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
@@ -397,10 +400,19 @@ class EventManagerTest extends TestCase
         $validationResult = new ValidationResult($validator, $event, true);
 
         $validator->shouldReceive('validate')
-            ->with($event)
+            ->with(Mockery::on(function ($attribute) use ($expectedEventMessage) {
+                return $attribute instanceof EventInterface
+                    && $attribute->toMessage() == $expectedEventMessage;
+            }))
             ->andReturn($validationResult);
 
         $manager = new EventManager($adapter, $translator, $validator);
+        $manager->addAttributeInjector(function () {
+            return [
+                'key' => 'i_r',
+                'value' => 'an injected attribute'
+            ];
+        });
 
         $manager->dispatch('channel', $event);
     }
@@ -411,16 +423,19 @@ class EventManagerTest extends TestCase
 
         $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
 
+        $expectedEventMessage = [
+            'event' => 'user.created',
+            'user' => [
+                'id' => 1234,
+            ],
+            'i_r' => 'an injected attribute',
+        ];
+
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
         $adapter->shouldReceive('publish')
             ->withArgs([
                 'channel',
-                [
-                    'event' => 'user.created',
-                    'user' => [
-                        'id' => 1234,
-                    ],
-                ],
+                $expectedEventMessage,
             ]);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
@@ -430,10 +445,19 @@ class EventManagerTest extends TestCase
         $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
 
         $validator->shouldReceive('validate')
-            ->with($event)
+            ->with(Mockery::on(function ($attribute) use ($expectedEventMessage) {
+                return $attribute instanceof EventInterface
+                    && $attribute->toMessage() == $expectedEventMessage;
+            }))
             ->andReturn($validationResult);
 
         $manager = new EventManager($adapter, $translator, $validator);
+        $manager->addAttributeInjector(function () {
+            return [
+                'key' => 'i_r',
+                'value' => 'an injected attribute'
+            ];
+        });
 
         $manager->dispatch('channel', $event);
     }
@@ -441,6 +465,14 @@ class EventManagerTest extends TestCase
     public function testDispatchWithValidatorSetAndValidationFailsAndExceptionIsSuppressed()
     {
         $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
+
+        $expectedEventMessage = [
+            'event' => 'user.created',
+            'user' => [
+                'id' => 1234,
+            ],
+            'i_r' => 'an injected attribute',
+        ];
 
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
 
@@ -451,10 +483,19 @@ class EventManagerTest extends TestCase
         $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
 
         $validator->shouldReceive('validate')
-            ->with($event)
+            ->with(Mockery::on(function ($attribute) use ($expectedEventMessage) {
+                return $attribute instanceof EventInterface
+                    && $attribute->toMessage() == $expectedEventMessage;
+            }))
             ->andReturn($validationResult);
 
         $manager = new EventManager($adapter, $translator, $validator);
+        $manager->addAttributeInjector(function () {
+            return [
+                'key' => 'i_r',
+                'value' => 'an injected attribute'
+            ];
+        });
         $manager->throwValidationExceptionsOnDispatch(false);
 
         $manager->dispatch('channel', $event);
@@ -466,6 +507,14 @@ class EventManagerTest extends TestCase
 
         $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
 
+        $expectedEventMessage = [
+            'event' => 'user.created',
+            'user' => [
+                'id' => 1234,
+            ],
+            'i_r' => 'an injected attribute',
+        ];
+
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
@@ -475,10 +524,19 @@ class EventManagerTest extends TestCase
         $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
 
         $validator->shouldReceive('validate')
-            ->with($event)
+            ->with(Mockery::on(function ($attribute) use ($expectedEventMessage) {
+                return $attribute instanceof EventInterface
+                    && $attribute->toMessage() == $expectedEventMessage;
+            }))
             ->andReturn($validationResult);
 
         $manager = new EventManager($adapter, $translator, $validator);
+        $manager->addAttributeInjector(function () {
+            return [
+                'key' => 'i_r',
+                'value' => 'an injected attribute'
+            ];
+        });
 
         $validationFailHandler = Mockery::mock(\stdClass::class);
         $validationFailHandler->shouldReceive('handle')
@@ -492,6 +550,14 @@ class EventManagerTest extends TestCase
     {
         $event = new SimpleEvent('user.created', ['user' => ['id' => 1234]]);
 
+        $expectedEventMessage = [
+            'event' => 'user.created',
+            'user' => [
+                'id' => 1234,
+            ],
+            'i_r' => 'an injected attribute',
+        ];
+
         $adapter = Mockery::mock(PubSubAdapterInterface::class);
 
         $translator = Mockery::mock(MessageTranslatorInterface::class);
@@ -501,10 +567,19 @@ class EventManagerTest extends TestCase
         $validationResult = new ValidationResult($validator, $event, false, ['Required properties missing: ["user"]']);
 
         $validator->shouldReceive('validate')
-            ->with($event)
+            ->with(Mockery::on(function ($attribute) use ($expectedEventMessage) {
+                return $attribute instanceof EventInterface
+                    && $attribute->toMessage() == $expectedEventMessage;
+            }))
             ->andReturn($validationResult);
 
         $manager = new EventManager($adapter, $translator, $validator);
+        $manager->addAttributeInjector(function () {
+            return [
+                'key' => 'i_r',
+                'value' => 'an injected attribute'
+            ];
+        });
         $manager->throwValidationExceptionsOnDispatch(false);
 
         $validationFailHandler = Mockery::mock(\stdClass::class);

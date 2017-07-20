@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.2 - 2017-07-20
+
+* Fix events not being validated correctly when attribute injectors are used
+
 ## 4.0.1 - 2017-07-18
 
 * Fix events dispatching when validation fails & exceptions are suppressed

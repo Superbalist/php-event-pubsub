@@ -301,11 +301,11 @@ class EventManager
      */
     public function dispatch($channel, EventInterface $event)
     {
-        $e = $this->prepEventForDispatch($event);
+        $event = $this->prepEventForDispatch($event);
         if ($this->validator) {
             $result = $this->validator->validate($event);
             if ($result->passes()) {
-                $this->adapter->publish($channel, $e->toMessage());
+                $this->adapter->publish($channel, $event->toMessage());
             } else {
                 // pass to validation fail handler?
                 if ($this->validationFailHandler) {
@@ -317,7 +317,7 @@ class EventManager
                 }
             }
         } else {
-            $this->adapter->publish($channel, $e->toMessage());
+            $this->adapter->publish($channel, $event->toMessage());
         }
     }
 
