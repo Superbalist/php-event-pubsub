@@ -410,7 +410,7 @@ class EventManagerTest extends TestCase
         $manager->addAttributeInjector(function () {
             return [
                 'key' => 'i_r',
-                'value' => 'an injected attribute'
+                'value' => 'an injected attribute',
             ];
         });
 
@@ -455,7 +455,7 @@ class EventManagerTest extends TestCase
         $manager->addAttributeInjector(function () {
             return [
                 'key' => 'i_r',
-                'value' => 'an injected attribute'
+                'value' => 'an injected attribute',
             ];
         });
 
@@ -493,7 +493,7 @@ class EventManagerTest extends TestCase
         $manager->addAttributeInjector(function () {
             return [
                 'key' => 'i_r',
-                'value' => 'an injected attribute'
+                'value' => 'an injected attribute',
             ];
         });
         $manager->throwValidationExceptionsOnDispatch(false);
@@ -534,7 +534,7 @@ class EventManagerTest extends TestCase
         $manager->addAttributeInjector(function () {
             return [
                 'key' => 'i_r',
-                'value' => 'an injected attribute'
+                'value' => 'an injected attribute',
             ];
         });
 
@@ -577,7 +577,7 @@ class EventManagerTest extends TestCase
         $manager->addAttributeInjector(function () {
             return [
                 'key' => 'i_r',
-                'value' => 'an injected attribute'
+                'value' => 'an injected attribute',
             ];
         });
         $manager->throwValidationExceptionsOnDispatch(false);
