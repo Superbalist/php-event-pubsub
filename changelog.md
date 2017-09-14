@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.0.3 - 2017-07-20
+## 4.0.3 - 2017-09-14
 
 * JSONValidator should just pass the json serializable validation result through
 
