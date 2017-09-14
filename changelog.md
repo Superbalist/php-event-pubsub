@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.3 - 2017-07-20
+
+* JSONValidator should just pass the json serializable validation result through
+
 ## 4.0.2 - 2017-07-20
 
 * Fix events not being validated correctly when attribute injectors are used

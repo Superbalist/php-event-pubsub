@@ -58,8 +58,8 @@ class JSONSchemaEventValidatorTest extends TestCase
         $this->assertFalse($result->passes());
         $this->assertTrue($result->fails());
         $this->assertEquals(
-            ['Required properties missing: ["user"]'],
-            $result->errors()
+            'Required properties missing: ["user"]',
+            $result->errors()[0]->getMessage()
         );
     }
 

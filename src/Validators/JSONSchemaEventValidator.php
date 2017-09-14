@@ -41,11 +41,7 @@ class JSONSchemaEventValidator implements EventValidatorInterface
         if ($schemaValidator->passes()) {
             return new ValidationResult($this, $event, true);
         } else {
-            $errors = [];
-            foreach ($schemaValidator->errors() as $error) {
-                /* @var ValidationError $error */
-                $errors[] = $error->getMessage();
-            }
+            $errors = $schemaValidator->errors();
             return new ValidationResult($this, $event, false, $errors);
         }
     }
