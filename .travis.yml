@@ -3,10 +3,11 @@ language: php
 php:
   - 5.6
   - 7.0
-  - 7.4
+  - 7.3
   - nightly
 
 before_script:
   - composer install
 
 script: ./vendor/bin/phpunit --configuration phpunit.xml
+w
