@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.4 - 2019-12-06
+
+* Don't insert key from injectors when the value is null
+
 ## 4.0.3 - 2017-09-14
 
 * JSONValidator should just pass the json serializable validation result through

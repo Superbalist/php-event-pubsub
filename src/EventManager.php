@@ -249,10 +249,15 @@ class EventManager
 
         foreach ($this->attributeInjectors as $injector) {
             if ($injector instanceof AttributeInjectorInterface) {
-                $values[$injector->getAttributeKey()] = $injector->getAttributeValue();
+                $v = $injector->getAttributeValue();
+                if ($v !== null) {
+                    $values[$injector->getAttributeKey()] = $v;
+                }
             } elseif (is_callable($injector)) {
                 $v = call_user_func($injector);
-                $values[$v['key']] = $v['value'];
+                if ($v['value'] !== null) {
+                    $values[$v['key']] = $v['value'];
+                }
             }
         }
 
